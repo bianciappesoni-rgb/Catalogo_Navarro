@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1 class="mb-3">Catálogo Navarro S.A.</h1>
+
+  {# Mensaje de error si falla la conexión / query #}
+  {% if error %}
+    <div class="alert alert-danger">
+      Error al conectar a la base de datos:<br>
+      <code>{{ error }}</code>
+    </div>
+  {% endif %}
+
+  <p class="text-muted">
+    Registros encontrados: {{ productos|length }}
+  </p>
+
+  {% if productos|length == 0 %}
+    <div class="alert alert-warning">
+      No se encontraron registros en el catálogo. ¿Se corrió el script de scraping?
+    </div>
+  {% else %}
+
+    <div class="row g-3">
+      {% for p in productos %}
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm">
+
+            {# Imagen #}
+            {% if p.foto_url %}
+              <img
+                src="{{ p.foto_url }}"
+                class="card-img-top"
+                alt="{{ p.titulo }}"
+                loading="lazy"
+              >
+            {% else %}
+              <div class="card-img-top d-flex align-items-center justify-content-center bg-secondary text-white"
+                   style="height: 180px;">
+                Sin imagen
+              </div>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ p.titulo }}</h5>
+
+              <p class="card-text mb-1">
+                <strong>Marca:</strong> {{ p.marca or "-" }}
+              </p>
+
+              <p class="card-text mb-1">
+                <strong>Familia:</strong> {{ p.familia or "-" }}
+              </p>
+
+              {% if p.precio_texto %}
+                <p class="card-text fw-bold mb-2">
+                  {{ p.precio_texto }}
+                </p>
+              {% endif %}
+
+              <p class="card-text mt-auto mb-1">
+                <small class="text-muted">
+                  Actualizado: {{ p.fecha_data }}
+                </small>
+              </p>
+
+              {% if p.url_aviso %}
+                <a href="{{ p.url_aviso }}"
+                   class="btn btn-sm btn-success w-100"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                  Ver aviso en Agroads
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% endif %}
+{% endblock %}
