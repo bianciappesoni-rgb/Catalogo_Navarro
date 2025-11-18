@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="utf-8">
-    <title>Mini Flask by Bian</title>
+    <title>Catalogo Navarro S.A.</title>
 
     <!-- Bootstrap CDN -->
     <link
@@ -13,10 +13,19 @@
   <body class="bg-light">
 
     <nav class="navbar navbar-dark bg-dark mb-4">
-      <div class="container">
-        <a class="navbar-brand" href="/">Mi App Flask</a>
-      </div>
-    </nav>
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('catalogo') }}">
+      <img
+        src="{{ url_for('static', filename='img/logo_iso.png') }}"
+        alt="Navarro S.A."
+        width="40"
+        class="me-2"
+      >
+      <span>Catálogo Navarro S.A.</span>
+    </a>
+  </div>
+</nav>
+
 
     <div class="container">
       {% block content %}{% endblock %}

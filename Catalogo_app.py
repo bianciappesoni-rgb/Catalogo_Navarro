@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from pathlib import Path
 import pandas as pd
 
@@ -59,7 +59,37 @@ def home():
 @app.route("/catalogo")
 def catalogo():
     productos, error = obtener_catalogo()
-    return render_template("catalogo.html", productos=productos, error=error)
+
+    # Si hubo error, devolvemos igual para mostrar el mensaje en pantalla
+    if error:
+        return render_template("catalogo.html", productos=[], error=error)
+
+    # ---------- valores de los filtros (vienen por ?marca=xxx&familia=yyy) ----------
+    marca_sel = request.args.get("marca", "").strip()
+    familia_sel = request.args.get("familia", "").strip()
+
+    # ---------- armamos listas únicas para los combos ----------
+    marcas = sorted({p["marca"] for p in productos if p.get("marca")})
+    familias = sorted({p["familia"] for p in productos if p.get("familia")})
+
+    # ---------- aplicamos filtros en memoria ----------
+    productos_filtrados = []
+    for p in productos:
+        if marca_sel and p.get("marca") != marca_sel:
+            continue
+        if familia_sel and p.get("familia") != familia_sel:
+            continue
+        productos_filtrados.append(p)
+
+    return render_template(
+        "catalogo.html",
+        productos=productos_filtrados,
+        error=error,
+        marcas=marcas,
+        familias=familias,
+        marca_sel=marca_sel,
+        familia_sel=familia_sel,
+    )
 
 
 if __name__ == "__main__":
