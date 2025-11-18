@@ -1,7 +1,11 @@
-<h1 class="mb-3">Catálogo Navarro S.A.</h1>
+{% extends "base.html" %}
 
-{# FORMULARIO DE FILTROS #}
-<form method="get" class="row g-2 mb-3">
+{% block content %}
+
+<h1 class="mb-4 text-center">Catálogo Navarro S.A.</h1>
+
+<!-- Filtros -->
+<form method="get" class="row g-3 mb-4">
   <div class="col-md-4">
     <label class="form-label">Marca</label>
     <select name="marca" class="form-select">
@@ -26,10 +30,51 @@
     </select>
   </div>
 
-  <div class="col-md-4 d-flex align-items-end gap-2">
-    <button type="submit" class="btn btn-primary">Filtrar</button>
-    <a href="{{ url_for('catalogo') }}" class="btn btn-outline-secondary">
-      Limpiar
-    </a>
+  <div class="col-md-4 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+    <a href="{{ url_for('catalogo') }}" class="btn btn-secondary">Limpiar</a>
   </div>
 </form>
+
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+{% if productos|length == 0 %}
+  <div class="alert alert-warning">
+    No se encontraron productos con los filtros seleccionados.
+  </div>
+{% endif %}
+
+<!-- Listado de productos -->
+<div class="row g-4">
+  {% for p in productos %}
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+      <div class="card h-100 shadow-sm">
+
+        {% if p.foto_url %}
+          <img src="{{ p.foto_url }}" class="card-img-top" alt="{{ p.titulo }}">
+        {% endif %}
+
+        <div class="card-body">
+          <h5 class="card-title">{{ p.titulo }}</h5>
+          <p class="card-text">
+            <strong>Marca:</strong> {{ p.marca }}<br>
+            <strong>Familia:</strong> {{ p.familia }}<br>
+            <strong>Precio:</strong> {{ p.precio_texto }}
+          </p>
+          <a href="{{ p.url_aviso }}" class="btn btn-success" target="_blank">
+            Ver aviso
+          </a>
+        </div>
+
+        <div class="card-footer text-muted small">
+          Fecha scraping: {{ p.fecha_data }}
+        </div>
+
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
