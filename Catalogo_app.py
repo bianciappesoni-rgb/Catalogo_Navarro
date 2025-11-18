@@ -1,6 +1,10 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, send_file
 from pathlib import Path
 import pandas as pd
+from io import BytesIO
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+
 
 app = Flask(__name__)
 
@@ -37,7 +41,6 @@ def obtener_catalogo():
             if col not in df.columns:
                 return [], f"Falta la columna '{col}' en el CSV de catálogo"
 
-        # Convertir a lista de dicts para que Jinja pueda usar p.xxx
         productos = df.to_dict(orient="records")
         return productos, None
 
@@ -60,19 +63,18 @@ def home():
 def catalogo():
     productos, error = obtener_catalogo()
 
-    # Si hubo error, devolvemos igual para mostrar el mensaje en pantalla
     if error:
         return render_template("catalogo.html", productos=[], error=error)
 
-    # ---------- valores de los filtros (vienen por ?marca=xxx&familia=yyy) ----------
+    # Filtros
     marca_sel = request.args.get("marca", "").strip()
     familia_sel = request.args.get("familia", "").strip()
 
-    # ---------- armamos listas únicas para los combos ----------
+    # Combos
     marcas = sorted({p["marca"] for p in productos if p.get("marca")})
     familias = sorted({p["familia"] for p in productos if p.get("familia")})
 
-    # ---------- aplicamos filtros en memoria ----------
+    # Aplicar filtros
     productos_filtrados = []
     for p in productos:
         if marca_sel and p.get("marca") != marca_sel:
@@ -91,6 +93,41 @@ def catalogo():
         familia_sel=familia_sel,
     )
 
+
+@app.route("/catalogo/print")
+def catalogo_print():
+    productos, error = obtener_catalogo()
+
+    if error:
+        return render_template("catalogo_print.html",
+                               productos=[],
+                               error=error,
+                               marca_sel="",
+                               familia_sel="")
+
+    marca_sel = request.args.get("marca", "").strip()
+    familia_sel = request.args.get("familia", "").strip()
+
+    productos_filtrados = []
+    for p in productos:
+        if marca_sel and p.get("marca") != marca_sel:
+            continue
+        if familia_sel and p.get("familia") != familia_sel:
+            continue
+        productos_filtrados.append(p)
+
+    return render_template(
+        "catalogo_print.html",
+        productos=productos_filtrados,
+        error=error,
+        marca_sel=marca_sel,
+        familia_sel=familia_sel,
+    )
+
+
+# ==========================
+# MAIN
+# ==========================
 
 if __name__ == "__main__":
     print("Levantando Flask…")

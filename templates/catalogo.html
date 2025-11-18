@@ -6,6 +6,7 @@
 
 <!-- Filtros -->
 <form method="get" class="row g-3 mb-4">
+
   <div class="col-md-4">
     <label class="form-label">Marca</label>
     <select name="marca" class="form-select">
@@ -30,21 +31,25 @@
     </select>
   </div>
 
-  <div class="col-md-4 d-flex align-items-end">
-    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-    <a href="{{ url_for('catalogo') }}" class="btn btn-secondary">Limpiar</a>
+  <div class="col-md-4 d-flex align-items-end gap-2">
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+
+    <a href="{{ url_for('catalogo') }}" class="btn btn-outline-secondary">
+      Limpiar
+    </a>
+
+    <!-- BOTÓN PARA EXPORTAR PDF -->
+    <a
+      href="{{ url_for('catalogo_print', marca=marca_sel, familia=familia_sel) }}"
+      class="btn btn-outline-danger"
+      target="_blank"
+    >
+      Exportar PDF
+    </a>
+
   </div>
+
 </form>
-
-{% if error %}
-  <div class="alert alert-danger">{{ error }}</div>
-{% endif %}
-
-{% if productos|length == 0 %}
-  <div class="alert alert-warning">
-    No se encontraron productos con los filtros seleccionados.
-  </div>
-{% endif %}
 
 <!-- Listado de productos -->
 <div class="row g-4">
