@@ -15,30 +15,47 @@ app = Flask(__name__)
 DATA_PATH = Path(__file__).parent / "data" / "catalogo.csv"
 
 
+from io import StringIO  # <-- agregá este import arriba
+
 def obtener_catalogo():
     """
-    Lee el archivo CSV generado desde el scraping.
+    Lee el archivo CSV.
     Si algo falla, devuelve ([], mensaje_error).
     """
     try:
         if not DATA_PATH.exists():
             return [], f"No se encontró el archivo {DATA_PATH.name} en la carpeta data/"
 
-        df = pd.read_csv(DATA_PATH)
+        # Leer texto crudo
+        raw = DATA_PATH.read_text(encoding="utf-8", errors="replace").splitlines()
+        if not raw:
+            return [], "El CSV está vacío"
 
-        # 🔧 limpiar nombres de columnas (BOM / espacios)
+        header = raw[0]
+        fixed_lines = [header]
+
+        # Fix del formato inválido: quitar comillas exteriores y desdoblar "" -> "
+        for line in raw[1:]:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith('"') and line.endswith('"'):
+                line = line[1:-1]
+            line = line.replace('""', '"')
+            fixed_lines.append(line)
+
+        df = pd.read_csv(StringIO("\n".join(fixed_lines)))
+
+        # limpiar nombres de columnas (BOM / espacios)
         df.columns = (
             df.columns.astype(str)
             .str.replace("\ufeff", "", regex=False)
             .str.strip()
         )
 
-        # 🔧 compatibilidad de nombre de fecha
+        # compatibilidad fecha
         if "fecha_data" not in df.columns and "fecha_scraping" in df.columns:
             df = df.rename(columns={"fecha_scraping": "fecha_data"})
-
-        # DEBUG para Render
-        print("Columnas CSV:", list(df.columns))
 
         columnas_necesarias = [
             "titulo",
@@ -54,12 +71,13 @@ def obtener_catalogo():
         if faltantes:
             return [], f"Faltan columnas en CSV: {faltantes}"
 
-        productos = df[columnas_necesarias].to_dict(orient="records")
+        productos = df.to_dict(orient="records")
         return productos, None
 
     except Exception as e:
         print("Error leyendo catalogo.csv:", e)
         return [], str(e)
+
 
 
 # ==========================
