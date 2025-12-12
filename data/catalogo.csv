@@ -1,4 +1,4 @@
-id_aviso;titulo;marca;rubro1;familia;rubro3;rubro4;precio;moneda;descuento;precio_texto;foto_url;url_aviso;vendedor;fecha_scraping
+id_aviso;titulo;marca;rubro1;familia;rubro3;rubro4;precio;moneda;descuento;precio_texto;foto_url;url_aviso;vendedor;fecha_data
 635947;Tractor John Deere 5090e;John Deere;Maquinaria Agricola;Tractores;Agricolas;De tracción doble;NULL;NULL;NULL;$ Consultar;https://static2.aastatic.com.ar/files/variants/500/7c17c7b949254974864a454cc3a4e2a3.jpg;https://www.agroads.com.ar/detalle.asp?clasi=635947;NAVARRO S. A.;12/12/2025 08:38
 675396;Pulverizadora Pla 3300 MD - Alas Mixtas 36 Metros;PLA;Maquinaria Agricola;Pulverizadoras;Autopropulsadas;;311046.00;NULL;NULL;u$s 311.046;https://static2.aastatic.com.ar/files/variants/500/de880909c59a452bb9014677e819c5bc.jpg;https://www.agroads.com.ar/detalle.asp?clasi=675396;NAVARRO S. A.;12/12/2025 08:38
 829025;Sembradora Pla STP G 13 a 52.5;PLA;Maquinaria Agricola;Sembradoras;De grano grueso;Neumáticas;123511.00;NULL;NULL;u$s 123.511;https://static2.aastatic.com.ar/files/variants/500/90c1db5a36164f4798c804b9d13387b1.jpg;https://www.agroads.com.ar/detalle.asp?clasi=829025;NAVARRO S. A.;12/12/2025 08:38
