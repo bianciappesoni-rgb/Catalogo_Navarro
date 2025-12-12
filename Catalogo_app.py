@@ -12,13 +12,12 @@ app = Flask(__name__)
 # CONFIG RUTA CSV
 # ==========================
 
-# data/catalogo.csv (al lado de este .py)
 DATA_PATH = Path(__file__).parent / "data" / "catalogo.csv"
 
 
 def obtener_catalogo():
     """
-    Lee el archivo CSV generado desde la VIEW catalogo_navarro.
+    Lee el archivo CSV generado desde el scraping.
     Si algo falla, devuelve ([], mensaje_error).
     """
     try:
@@ -27,7 +26,20 @@ def obtener_catalogo():
 
         df = pd.read_csv(DATA_PATH)
 
-        # Nos aseguramos de que existan las columnas que usa el template
+        # 🔧 limpiar nombres de columnas (BOM / espacios)
+        df.columns = (
+            df.columns.astype(str)
+            .str.replace("\ufeff", "", regex=False)
+            .str.strip()
+        )
+
+        # 🔧 compatibilidad de nombre de fecha
+        if "fecha_data" not in df.columns and "fecha_scraping" in df.columns:
+            df = df.rename(columns={"fecha_scraping": "fecha_data"})
+
+        # DEBUG para Render
+        print("Columnas CSV:", list(df.columns))
+
         columnas_necesarias = [
             "titulo",
             "marca",
@@ -37,11 +49,12 @@ def obtener_catalogo():
             "url_aviso",
             "fecha_data",
         ]
-        for col in columnas_necesarias:
-            if col not in df.columns:
-                return [], f"Falta la columna '{col}' en el CSV de catálogo"
 
-        productos = df.to_dict(orient="records")
+        faltantes = [c for c in columnas_necesarias if c not in df.columns]
+        if faltantes:
+            return [], f"Faltan columnas en CSV: {faltantes}"
+
+        productos = df[columnas_necesarias].to_dict(orient="records")
         return productos, None
 
     except Exception as e:
@@ -55,7 +68,6 @@ def obtener_catalogo():
 
 @app.route("/")
 def home():
-    # Redirigimos directo al catálogo
     return redirect(url_for("catalogo"))
 
 
@@ -66,15 +78,12 @@ def catalogo():
     if error:
         return render_template("catalogo.html", productos=[], error=error)
 
-    # Filtros
     marca_sel = request.args.get("marca", "").strip()
     familia_sel = request.args.get("familia", "").strip()
 
-    # Combos
     marcas = sorted({p["marca"] for p in productos if p.get("marca")})
     familias = sorted({p["familia"] for p in productos if p.get("familia")})
 
-    # Aplicar filtros
     productos_filtrados = []
     for p in productos:
         if marca_sel and p.get("marca") != marca_sel:
@@ -99,11 +108,13 @@ def catalogo_print():
     productos, error = obtener_catalogo()
 
     if error:
-        return render_template("catalogo_print.html",
-                               productos=[],
-                               error=error,
-                               marca_sel="",
-                               familia_sel="")
+        return render_template(
+            "catalogo_print.html",
+            productos=[],
+            error=error,
+            marca_sel="",
+            familia_sel=""
+        )
 
     marca_sel = request.args.get("marca", "").strip()
     familia_sel = request.args.get("familia", "").strip()
